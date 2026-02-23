@@ -26,9 +26,10 @@
 5. [Detailed Component Breakdown](#5-detailed-component-breakdown)
 6. [How the Components Talk to Each Other](#6-how-the-components-talk-to-each-other)
 7. [Deployment Workflow](#7-deployment-workflow)
-8. [Key AWS Concepts Explained](#8-key-aws-concepts-explained)
-9. [Common Issues & Troubleshooting](#9-common-issues--troubleshooting)
-10. [Cleanup & Cost Management](#10-cleanup--cost-management)
+8. [CloudWatch Monitoring & Alerts](#8-cloudwatch-monitoring--alerts)
+9. [Key AWS Concepts Explained](#9-key-aws-concepts-explained)
+10. [Common Issues & Troubleshooting](#10-common-issues--troubleshooting)
+11. [Cleanup & Cost Management](#11-cleanup--cost-management)
 
 ---
 
@@ -50,6 +51,8 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
 | **EC2 for backend** | We need a server to run Python code (Flask API) that processes requests |
 | **S3 for images** | Images are static files — S3 is cheaper and faster for serving them than EC2 |
 | **Flask (Python)** | Simple, beginner-friendly web framework for building REST APIs |
+| **CloudWatch** | Monitor EC2 health in real time and get email alerts if something goes wrong |
+
 
 ---
 
@@ -82,8 +85,20 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
                     │ └─────────────────┘ │ │ Access Enabled  │
                     │ Security Group:     │ └─────────────────┘
                     │ - SSH (22)          │
-                    │ - HTTP (80)         │
-                    │ - Flask (5000)      │
+                    │ - HTTP (80)         │         ▲
+                    │ - Flask (5000)      │         │
+                    └─────────────────────┘         │ Monitored by
+                              │                     │
+                              ▼                     │
+                    ┌─────────────────────┐         │
+                    │   CLOUDWATCH        │─────────┘
+                    │   - CPU Alarm       │
+                    │   - Network Alarm   │
+                    │   - Dashboard       │
+                    │        │            │
+                    │        ▼            │
+                    │   SNS TOPIC         │
+                    │   (Email Alert)     │
                     └─────────────────────┘
 ```
 
@@ -190,6 +205,13 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
     │  Static Website  │   │  Flask runs on       │
     │  Hosting ON      │   │  port 5000           │
     └──────────────────┘   └──────────────────────┘
+                                      │
+                                      │ Monitored by
+                                      ▼
+                           ┌──────────────────────┐
+                           │  CLOUDWATCH          │
+                           │  Dashboard + Alarms  │
+                           └──────────────────────┘
 
 
     DEPLOYMENT COMMANDS USED:
@@ -272,6 +294,17 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
     │  │  CORS: GET from all origins     │  │
     │  └─────────────────────────────────┘  │
     │                                       │
+    │  ┌─────────────────────────────────┐  │
+    │  │  CLOUDWATCH                     │  │
+    │  │  Dashboard: ShopVista-Dashboard │  │
+    │  │  Alarm: ShopVista-High-CPU      │  │
+    │  │  Alarm: ShopVista-High-Network  │  │
+    │  │        │                        │  │
+    │  │        ▼                        │  │
+    │  │  SNS Topic: shopvista-alerts    │  │
+    │  │  → Email notification on alarm  │  │
+    │  └─────────────────────────────────┘  │
+    │                                       │
     └───────────────────────────────────────┘
 ```
 
@@ -315,13 +348,23 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
 - **Public IP** = The internet address of your EC2 instance
 - **SSH** = A protocol to securely connect to a remote server via terminal
 
-### 3.3 IAM (Identity and Access Management)
+### 3.3 Amazon CloudWatch
 
 | What | Details |
 |------|---------|
-| **What is it?** | Controls WHO can access WHAT in your AWS account |
-| **Why we used it** | To set up permissions for S3 buckets and EC2 access |
-| **Key concept** | **Least Privilege** — only give the minimum permissions needed |
+| **What is it?** | AWS monitoring and observability service — tracks metrics, logs, and events |
+| **Why we used it** | To monitor our EC2 instance health and get email alerts if something goes wrong |
+| **What we monitor** | CPU utilization, NetworkIn, NetworkOut |
+| **Alarms created** | 2 — one for high CPU, one for high network traffic |
+| **Cost** | Free Tier: 10 alarms, 3 dashboards, 5GB logs/month |
+
+**Key Concepts:**
+- **Metric** = A data point measured over time (e.g., CPU usage at 5-minute intervals)
+- **Alarm** = A rule that watches a metric and triggers an action when it crosses a threshold
+- **Dashboard** = A visual panel showing multiple metrics and alarm statuses in one place
+- **SNS (Simple Notification Service)** = The service that sends email alerts when an alarm fires
+
+
 
 ---
 
@@ -409,6 +452,32 @@ Step 13 ─► Upload Frontend to S3 (Member 1)
              S3 frontend bucket with static hosting enabled
 ```
 
+### Phase 3: CloudWatch Monitoring Setup
+
+```
+Step 14 ─► Created CloudWatch Dashboard
+           • Dashboard name: ShopVista-Dashboard
+           • Added widgets: CPUUtilization, NetworkIn, NetworkOut
+           • All metrics tied to shopvista-instance
+
+Step 15 ─► Set Up SNS Email Alerts
+           • Created SNS topic: shopvista-alerts
+           • Subscribed team email
+           • Confirmed subscription via email link ✅
+
+Step 16 ─► Created CloudWatch Alarms
+           • Alarm 1: ShopVista-High-CPU
+             - Metric: CPUUtilization > 70% for 5 minutes
+             - Action: Email via shopvista-alerts SNS topic
+           • Alarm 2: ShopVista-High-Network
+             - Metric: NetworkIn > 5,000,000 bytes (5MB)
+             - Action: Email via shopvista-alerts SNS topic
+
+Step 17 ─► Added Alarm Status Widget to Dashboard
+           • Dashboard now shows live graphs + alarm status panel
+           • Full observability of EC2 instance in one view ✅
+```
+
 ---
 
 ## 5. Detailed Component Breakdown
@@ -479,6 +548,40 @@ Key features:
 ]
 ```
 
+### 5.3 CloudWatch Configuration
+
+#### Dashboard — `ShopVista-Dashboard`
+```
+Widgets:
+├── Line graph: CPUUtilization    — % CPU used by EC2 over time
+├── Line graph: NetworkIn         — Bytes received by EC2 over time
+├── Line graph: NetworkOut        — Bytes sent by EC2 over time
+└── Alarm status panel            — Visual status of both alarms
+```
+
+#### Alarms
+```
+ShopVista-High-CPU:
+├── Metric:    CPUUtilization (shopvista-instance)
+├── Period:    5 minutes
+├── Condition: Average > 70%
+└── Action:    Email via SNS topic shopvista-alerts
+
+ShopVista-High-Network:
+├── Metric:    NetworkIn (shopvista-instance)
+├── Period:    5 minutes
+├── Condition: Average > 5,000,000 bytes
+└── Action:    Email via SNS topic shopvista-alerts
+```
+
+#### SNS Topic — `shopvista-alerts`
+```
+Type:     Standard
+Protocol: Email
+Status:   Confirmed ✅
+Purpose:  Sends email to team when any alarm fires
+```
+
 ---
 
 ## 6. How the Components Talk to Each Other
@@ -542,7 +645,27 @@ For each product card:
   Image displays in the product card
 ```
 
-### 6.3 Why CORS Matters
+### 6.3 CloudWatch Monitoring Flow
+
+```
+EC2 Instance (shopvista-instance)
+        │
+        │  Automatically sends metrics every 5 minutes
+        │  (CPU, NetworkIn, NetworkOut)
+        │
+        ▼
+CloudWatch Metrics Store
+        │
+        ├──► ShopVista-Dashboard (displays live graphs)
+        │
+        └──► Alarm Evaluation
+                │
+                ├── CPU > 70%? ──► YES ──► Trigger SNS ──► Email sent to team 📧
+                │
+                └── Network > 5MB? ──► YES ──► Trigger SNS ──► Email sent to team 📧
+```
+
+### 6.4 Why CORS Matters
 
 ```
 WITHOUT CORS:                          WITH CORS:
@@ -650,9 +773,101 @@ curl http://localhost:5000/api/products
 
 ---
 
-## 8. Key AWS Concepts Explained
+## 8. CloudWatch Monitoring & Alerts
 
-### 8.1 For Absolute Beginners
+### 8.1 Why We Added CloudWatch
+
+By default, EC2 provides no visibility into how your server is performing. Without monitoring, you wouldn't know if your Flask API was under heavy load, running out of resources, or receiving a traffic spike — until it actually crashed. We added CloudWatch to solve this.
+
+> **Key insight:** EC2 by default only reports CPU and network metrics automatically. We used these default (free) metrics to set up real-time monitoring without installing any additional agents — keeping everything within the AWS Free Tier.
+
+### 8.2 What We Monitor
+
+| Metric | Why It Matters |
+|--------|---------------|
+| **CPUUtilization** | If CPU stays above 70%, Flask may slow down or stop responding to API requests |
+| **NetworkIn** | Measures incoming traffic — a spike could mean high user load or a bot attack |
+| **NetworkOut** | Measures data sent back to users — useful for tracking API response volume |
+
+### 8.3 CloudWatch Architecture
+
+```
+    ┌─────────────────────────────────────────────────────┐
+    │              CLOUDWATCH SETUP                       │
+    │                                                     │
+    │  EC2: shopvista-instance                            │
+    │       │                                             │
+    │       │  Auto-reports metrics every 5 mins          │
+    │       ▼                                             │
+    │  ┌────────────────────────────────────────────┐     │
+    │  │  ShopVista-Dashboard                       │     │
+    │  │  ┌──────────────┐  ┌──────────────────┐   │     │
+    │  │  │ CPU Graph    │  │ Network Graph    │   │     │
+    │  │  │ (line chart) │  │ In + Out         │   │     │
+    │  │  └──────────────┘  └──────────────────┘   │     │
+    │  │  ┌─────────────────────────────────────┐  │     │
+    │  │  │ Alarm Status Panel                  │  │     │
+    │  │  │  🟢 ShopVista-High-CPU   OK         │  │     │
+    │  │  │  🟢 ShopVista-High-Network  OK      │  │     │
+    │  │  └─────────────────────────────────────┘  │     │
+    │  └────────────────────────────────────────────┘     │
+    │                                                     │
+    │  Alarms:                                            │
+    │  ┌──────────────────────────────────────────────┐   │
+    │  │ ShopVista-High-CPU                           │   │
+    │  │   IF CPUUtilization > 70% for 5 mins         │   │
+    │  │   THEN → SNS → Email 📧                      │   │
+    │  └──────────────────────────────────────────────┘   │
+    │  ┌──────────────────────────────────────────────┐   │
+    │  │ ShopVista-High-Network                       │   │
+    │  │   IF NetworkIn > 5MB for 5 mins              │   │
+    │  │   THEN → SNS → Email 📧                      │   │
+    │  └──────────────────────────────────────────────┘   │
+    └─────────────────────────────────────────────────────┘
+```
+
+### 8.4 Setup Steps We Followed
+
+**Step 1 — Created the Dashboard**
+- Opened CloudWatch in ap-south-1
+- Created dashboard: `ShopVista-Dashboard`
+- Added Line widget with CPUUtilization, NetworkIn, NetworkOut for `shopvista-instance`
+
+**Step 2 — Created SNS Topic for Email Alerts**
+- Opened SNS → created Standard topic: `shopvista-alerts`
+- Created Email subscription with team email address
+- Confirmed subscription by clicking link in the AWS confirmation email
+
+**Step 3 — Created Alarm: ShopVista-High-CPU**
+- Metric: EC2 → Per-Instance Metrics → CPUUtilization → shopvista-instance
+- Condition: Average > 70 over 5 minutes
+- Action: Send notification to `shopvista-alerts` SNS topic
+
+**Step 4 — Created Alarm: ShopVista-High-Network**
+- Metric: EC2 → Per-Instance Metrics → NetworkIn → shopvista-instance
+- Condition: Average > 5,000,000 bytes over 5 minutes
+- Action: Send notification to `shopvista-alerts` SNS topic
+
+**Step 5 — Added Alarm Status Widget to Dashboard**
+- Added "Alarm status" widget to `ShopVista-Dashboard`
+- Both alarms visible in one unified view
+
+### 8.5 Free Tier Usage
+
+| CloudWatch Resource | Free Tier Limit | Our Usage |
+|--------------------|----------------|-----------|
+| Dashboards | 3 free | 1 ✅ |
+| Alarms | 10 free | 2 ✅ |
+| EC2 Metrics (CPU, Network) | Always free | 3 metrics ✅ |
+| SNS Email Notifications | 1,000/month free | A few ✅ |
+
+**Total CloudWatch cost: $0**
+
+---
+
+## 9. Key AWS Concepts Explained
+
+### 9.1 For Absolute Beginners
 
 | Concept | Real-World Analogy |
 |---------|-------------------|
@@ -661,11 +876,13 @@ curl http://localhost:5000/api/products
 | **EC2 Instance** | A computer you rent in the cloud. You can SSH into it just like your own laptop. |
 | **Security Group** | A security guard at the door — checks who's allowed in and on which door (port) |
 | **Key Pair (.pem)** | Your special ID card to get into the building (EC2). Without it, no entry. |
-| **IAM** | The building's access control system — decides who can access which rooms |
+
 | **Region** | Which city the building is in (we chose Mumbai = ap-south-1) |
 | **CORS** | A security rule in browsers that says "websites from domain A can/cannot request data from domain B" |
+| **CloudWatch** | The building's CCTV + fire alarm system — monitors everything and alerts you if something goes wrong |
+| **SNS** | The PA system that broadcasts alerts (in our case, emails the team) |
 
-### 8.2 SCP vs SSH — What's the Difference?
+### 9.2 SCP vs SSH — What's the Difference?
 
 ```
 SSH  = Secure Shell
@@ -685,7 +902,7 @@ SCP  = Secure Copy
        ⚠️ SCP runs from your LOCAL machine, not from inside EC2!
 ```
 
-### 8.3 What is `nohup`?
+### 9.3 What is `nohup`?
 
 ```
 WITHOUT nohup:                         WITH nohup:
@@ -705,7 +922,7 @@ Flask STOPS ❌                         Flask KEEPS RUNNING ✅
                                        all output to flask.log file"
 ```
 
-### 8.4 What is a REST API?
+### 9.4 What is a REST API?
 
 ```
 REST API = A way for programs to talk to each other over HTTP
@@ -732,9 +949,36 @@ Think of it like a restaurant:
     └─────────────────────────────────────────────────────┘
 ```
 
+### 9.5 What is CloudWatch Monitoring?
+
+```
+CloudWatch = AWS's built-in monitoring service
+
+Think of it like a car dashboard:
+
+    WITHOUT CloudWatch:              WITH CloudWatch:
+    ───────────────────              ────────────────
+
+    You're driving a car             Your dashboard shows:
+    with no dashboard.               • Speed (CPU %)
+    No speedometer,                  • Fuel (Memory)
+    no fuel gauge,                   • Temperature (Network)
+    no warning lights.               • Warning light (Alarm)
+                                     • SMS/Email if engine
+    You only find out                  overheats (SNS alert)
+    there's a problem
+    when the car stops. ❌           You see problems coming
+                                     before they happen. ✅
+
+Alarm States:
+    🔵 INSUFFICIENT_DATA  → Not enough data yet (first few minutes)
+    🟢 OK                 → Metric is within safe range
+    🔴 IN ALARM           → Threshold crossed! Email sent to team.
+```
+
 ---
 
-## 9. Common Issues & Troubleshooting
+## 10. Common Issues & Troubleshooting
 
 ### Issues We Encountered
 
@@ -744,6 +988,8 @@ Think of it like a restaurant:
 | 2 | PEM file permission denied | `.pem` file had wrong permissions | Run `chmod 400 your-key.pem` |
 | 3 | Images showing placeholder icons | S3 image URLs not yet configured | Updated `products.json` with real S3 bucket URLs |
 | 4 | **Images not loading on S3** | Used HTTPS S3 URL (`https://...s3.ap-south-1...`) which blocked HTTP API calls (Mixed Content) | Use the **S3 website endpoint** (`http://...s3-website.ap-south-1...`) instead — this serves over HTTP, matching the EC2 API |
+| 5 | CloudWatch alarm stuck on "Insufficient data" | Not enough time passed for metric evaluation | Wait 5-10 minutes — alarm moves to OK automatically |
+| 6 | SNS confirmation email not received | Email went to spam folder | Check spam/junk folder for email from AWS Notifications |
 
 > **💡 Key Learning — Mixed Content:**  
 > Browsers block HTTP requests made from HTTPS pages. S3 gives two URLs:  
@@ -762,10 +1008,11 @@ Think of it like a restaurant:
 | **Flask stops after closing SSH** | Use `nohup python3 app.py > flask.log 2>&1 &` instead of just `python3 app.py` |
 | **Can't SSH into EC2** | Check: (1) correct IP, (2) `chmod 400` on PEM, (3) correct username (`ec2-user` vs `ubuntu`), (4) Security Group allows SSH |
 | **S3 website shows 404** | Check: (1) Static website hosting is enabled, (2) Index document is set to `index.html` |
+| **CloudWatch alarm won't trigger** | Verify the correct instance ID is selected in the alarm metric |
 
 ---
 
-## 10. Cleanup & Cost Management
+## 11. Cleanup & Cost Management
 
 ### ⚠️ IMPORTANT: Avoid Unexpected Charges
 
@@ -786,11 +1033,20 @@ CLEANUP CHECKLIST:
 □ 3. S3 Images Bucket
      → Go to S3 → Select bucket → Empty → Delete bucket
 
-□ 4. Key Pair (optional)
+□ 4. CloudWatch Alarms
+     → Go to CloudWatch → Alarms → Select both → Delete
+
+□ 5. CloudWatch Dashboard
+     → Go to CloudWatch → Dashboards → Delete ShopVista-Dashboard
+
+□ 6. SNS Topic
+     → Go to SNS → Topics → Delete shopvista-alerts
+
+□ 7. Key Pair (optional)
      → Go to EC2 → Key Pairs → Delete
      → Also delete the .pem file from your Downloads
 
-□ 5. Security Group (auto-deleted when EC2 is terminated)
+□ 8. Security Group (auto-deleted when EC2 is terminated)
 ```
 
 ### Free Tier Limits (so you don't get charged)
@@ -799,6 +1055,9 @@ CLEANUP CHECKLIST:
 |---------|----------------|-----------|
 | EC2 | 750 hours/month of t2.micro | ✅ Within limit (stop when not testing) |
 | S3 | 5GB storage, 20K GET requests | ✅ Way within limit |
+| CloudWatch Alarms | 10 alarms/month | ✅ Using 2 |
+| CloudWatch Dashboards | 3 dashboards | ✅ Using 1 |
+| SNS Emails | 1,000/month | ✅ Way within limit |
 | Data Transfer | 100GB out/month | ✅ Way within limit |
 
 > **Tip**: Stop (not terminate) your EC2 instance when not testing. A stopped instance doesn't cost compute charges (only storage, which is minimal).
@@ -816,13 +1075,16 @@ What we accomplished:
 ✅ Deployed the API on EC2 (IP: 13.127.85.195)
 ✅ Stored product images on S3 (products-images-123)
 ✅ Connected frontend → EC2 API → S3 images
-✅ All three AWS services working together!
+✅ Added CloudWatch monitoring with live dashboard
+✅ Set up SNS email alerts for CPU and network alarms
+✅ All four AWS services working together!
 
 AWS Services used:
-  🪣 Amazon S3    — Static website hosting + Image storage
-  🖥️  Amazon EC2   — Flask API server
-  🔐 IAM          — Access management
-  🛡️  Security Groups — Network firewall
+  🪣 Amazon S3         — Static website hosting + Image storage
+  🖥️  Amazon EC2        — Flask API server
+  📊 Amazon CloudWatch — Real-time monitoring + Alarms
+  📢 Amazon SNS        — Email alert notifications
+  🛡️  Security Groups   — Network firewall
 
 Tools & Technologies:
   🐍 Python 3 + Flask
