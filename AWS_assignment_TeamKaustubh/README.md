@@ -58,6 +58,9 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
 
 ## 2. Architecture & Workflow Diagrams
 
+![ShopVista Architecture Diagram](images-and-security/Architecture-diagram.png)
+
+
 ### 2.1 High-Level Architecture
 
 ```
