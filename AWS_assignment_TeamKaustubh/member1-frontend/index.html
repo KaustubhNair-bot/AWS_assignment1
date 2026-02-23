@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse our curated collection of premium products. Shop electronics, clothing, accessories and more at great prices.">
+    <title>ShopVista — Premium Product Catalog</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ===== HEADER / NAVBAR ===== -->
+    <header id="site-header">
+        <div class="header-container">
+            <div class="logo" id="logo">
+                <span class="logo-icon">🛍️</span>
+                <span class="logo-text">Shop<span class="logo-highlight">Vista</span></span>
+            </div>
+            <nav id="main-nav">
+                <a href="#" class="nav-link active" data-category="all">All Products</a>
+                <a href="#" class="nav-link" data-category="Electronics">Electronics</a>
+                <a href="#" class="nav-link" data-category="Clothing">Clothing</a>
+                <a href="#" class="nav-link" data-category="Accessories">Accessories</a>
+            </nav>
+            <div class="header-actions">
+                <div class="search-box" id="search-box">
+                    <input type="text" id="search-input" placeholder="Search products..." autocomplete="off">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Discover Premium Products</h1>
+            <p class="hero-subtitle">Curated collection of the finest products, just for you</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number" id="total-products">0</span>
+                    <span class="stat-label">Products</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="total-categories">0</span>
+                    <span class="stat-label">Categories</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">⭐</span>
+                    <span class="stat-label">Top Rated</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </section>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main id="main-content">
+        <!-- Loading State -->
+        <div id="loading-state" class="state-container">
+            <div class="spinner"></div>
+            <p>Loading amazing products...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="state-container hidden">
+            <span class="error-icon">⚠️</span>
+            <h2>Oops! Something went wrong</h2>
+            <p id="error-message">Unable to fetch products. Please try again.</p>
+            <button id="retry-button" class="btn btn-primary" onclick="fetchProducts()">Retry</button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="state-container hidden">
+            <span class="empty-icon">📦</span>
+            <h2>No products found</h2>
+            <p>Try a different search or category.</p>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="products-grid" class="products-grid hidden">
+            <!-- Product cards will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer id="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo-icon">🛍️</span>
+                <span class="logo-text">Shop<span class="logo-highlight">Vista</span></span>
+                <p class="footer-desc">Your one-stop shop for premium products.</p>
+            </div>
+            <div class="footer-info">
+                <p>Built with ❤️ using AWS Services</p>
+                <p class="footer-tech">S3 Static Hosting • EC2 Flask API • S3 Image Storage</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

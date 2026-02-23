@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "name": "Wireless Noise-Cancelling Headphones",
+        "price": 2499,
+        "description": "Premium over-ear headphones with active noise cancellation, 30-hour battery life, and crystal-clear audio quality.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product1.jpeg",
+        "category": "Electronics"
+    },
+    {
+        "id": 2,
+        "name": "Smart Fitness Watch",
+        "price": 3999,
+        "description": "Track your health with heart rate monitoring, GPS, sleep tracking, and 7-day battery life. Water resistant up to 50m.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product2.jpeg",
+        "category": "Electronics"
+    },
+    {
+        "id": 3,
+        "name": "Classic Denim Jacket",
+        "price": 1899,
+        "description": "Timeless denim jacket with a modern fit. Made from premium cotton with vintage wash finish.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product3.jpeg",
+        "category": "Clothing"
+    },
+    {
+        "id": 4,
+        "name": "Leather Messenger Bag",
+        "price": 2799,
+        "description": "Handcrafted genuine leather messenger bag with padded laptop compartment. Perfect for work and travel.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product4.jpeg",
+        "category": "Accessories"
+    },
+    {
+        "id": 5,
+        "name": "Minimalist Running Shoes",
+        "price": 3499,
+        "description": "Ultra-lightweight running shoes with responsive cushioning and breathable mesh upper. Available in multiple colours.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product5.jpeg",
+        "category": "Clothing"
+    },
+    {
+        "id": 6,
+        "name": "Portable Bluetooth Speaker",
+        "price": 1599,
+        "description": "Compact waterproof speaker with 360° sound, 12-hour battery, and built-in microphone for hands-free calls.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product6.jpeg",
+        "category": "Electronics"
+    }
+]
