@@ -2,12 +2,14 @@
 
 > **Project**: ShopVista — A Product Catalog Website on AWS  
 > **Date**: 23 February 2026  
-> **Team Size**: 4 Members 
+> **Team Size**: 4 Members
+
 > **Team Members**: 
 > - Member 1: Dhairya Jain
 > - Member 2: Kaustubh Nair
 > - Member 3: Suryansh Gehlot
 > - Member 4: Ankit Luhar
+
 > **AWS Region**: ap-south-1 (Mumbai)  
 > **Frontend URL**: http://product-catalog-frontend-123.s3-website.ap-south-1.amazonaws.com  
 > **API URL**: http://13.127.85.195:5000/api/products  
