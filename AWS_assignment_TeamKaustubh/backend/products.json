@@ -46,5 +46,13 @@
         "description": "Compact waterproof speaker with 360° sound, 12-hour battery, and built-in microphone for hands-free calls.",
         "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product6.jpeg",
         "category": "Electronics"
+    },
+    {
+        "id": 7,
+        "name": "iPhone 17 Pro",
+        "price": 134900,
+        "description": "Experience the next level of performance with the iPhone 17 Pro in stunning Orange Titanium. Powered by the A19 Pro chip, featuring a 48MP ProCamera system with 5x optical zoom, Dynamic Island, and an always-on ProMotion display. 5G capable with up to 27 hours of video playback.",
+        "image": "https://products-images-123.s3.ap-south-1.amazonaws.com/product7.jpeg",
+        "category": "Apple"
     }
 ]
