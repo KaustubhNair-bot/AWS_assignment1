@@ -2,7 +2,7 @@
 // ShopVista — Product Catalog Frontend Script
 // ==============================================
 
-const API_BASE_URL = 'http://13.127.85.195:5000';
+const API_BASE_URL = 'http://65.2.82.172:5000';
 
 // ── DOM ELEMENTS ──────────────────────────────
 const productsGrid = document.getElementById('products-grid');

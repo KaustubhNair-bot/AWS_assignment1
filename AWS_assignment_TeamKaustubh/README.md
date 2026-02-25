@@ -12,7 +12,7 @@
 
 > **AWS Region**: ap-south-1 (Mumbai)  
 > **Frontend URL**: http://product-catalog-frontend-123.s3-website.ap-south-1.amazonaws.com  
-> **API URL**: http://13.127.85.195:5000/api/products  
+> **API URL**: http://65.2.82.172:5000/api/products  
 > **Images Bucket**: https://products-images-123.s3.ap-south-1.amazonaws.com
 
 ---
@@ -84,7 +84,7 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
 │                 │ │ │ (product data)  │ │ │ │product5.jpeg│ │
 │ Static Website  │ │ │                 │ │ │ │product6.jpeg│ │
 │ Hosting Enabled │ │ │Port: 5000       │ │ │ └─────────────┘ │
-└─────────────────┘ │ │IP: 13.127.85.195│ │ │ Public Read     │
+└─────────────────┘ │ │IP: 65.2.82.172│ │ │ Public Read     │
                     │ └─────────────────┘ │ │ Access Enabled  │
                     │ Security Group:     │ └─────────────────┘
                     │ - SSH (22)          │
@@ -129,7 +129,7 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
     │                             │
     │ script.js executes and      │
     │ calls: fetch() to           │
-    │ http://13.127.85.195:5000   │
+    │ http://65.2.82.172:5000   │
     │        /api/products        │
     │                             │
     │ EC2 Flask API returns:      │
@@ -203,7 +203,7 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
                ▼                      ▼
     ┌──────────────────┐   ┌──────────────────────┐
     │  S3 BUCKET       │   │  EC2 INSTANCE        │
-    │  (Frontend)      │   │  (13.127.85.195)     │
+    │  (Frontend)      │   │  (65.2.82.172)     │
     │                  │   │                      │
     │  Static Website  │   │  Flask runs on       │
     │  Hosting ON      │   │  port 5000           │
@@ -228,11 +228,11 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
     │  # 2. Upload backend files to EC2 via SCP                │
     │  scp -i ~/Downloads/shopvista-key.pem \                  │
     │      app.py products.json requirements.txt \             │
-    │      ec2-user@13.127.85.195:~/                           │
+    │      ec2-user@65.2.82.172:~/                           │
     │                                                          │
     │  # 3. SSH into EC2                                       │
     │  ssh -i ~/Downloads/shopvista-key.pem \                  │
-    │      ec2-user@13.127.85.195                              │
+    │      ec2-user@65.2.82.172                              │
     │                                                          │
     │  # 4. Install dependencies (on EC2)                      │
     │  sudo yum install python3 python3-pip -y                 │
@@ -278,7 +278,7 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
     │  │  │  │   EC2 INSTANCE      │  │  │  │
     │  │  │  │   t2.micro          │  │  │  │
     │  │  │  │   Amazon Linux 2    │  │  │  │
-    │  │  │  │   IP: 13.127.85.195 │  │  │  │
+    │  │  │  │   IP: 65.2.82.172 │  │  │  │
     │  │  │  │   Flask on :5000    │  │  │  │
     │  │  │  └─────────────────────┘  │  │  │
     │  │  └───────────────────────────┘  │  │
@@ -340,7 +340,7 @@ We built a **Product Catalog Website** — a web page that displays a list of pr
 | **Why we used it** | To run our Python Flask REST API |
 | **Instance type** | `t2.micro` (1 vCPU, 1GB RAM — Free Tier eligible) |
 | **AMI** | Amazon Linux 2 (operating system) |
-| **Our IP** | `13.127.85.195` |
+| **Our IP** | `65.2.82.172` |
 | **Cost** | Free Tier: 750 hours/month of t2.micro |
 
 **Key Concepts:**
@@ -425,7 +425,7 @@ Step 7 ──► Launched EC2 Instance (Member 2)
              - Port 22  (SSH)  — For terminal access
              - Port 80  (HTTP) — For web traffic
              - Port 5000       — For Flask API
-           • Got Public IP: 13.127.85.195
+           • Got Public IP: 65.2.82.172
 
 Step 8 ──► Fixed PEM Permissions
            • chmod 400 ~/Downloads/shopvista-key.pem
@@ -434,7 +434,7 @@ Step 8 ──► Fixed PEM Permissions
 Step 9 ──► Uploaded Code to EC2 via SCP
            • Command run FROM LOCAL Mac (not from inside EC2!):
              scp -i shopvista-key.pem app.py products.json 
-                 requirements.txt ec2-user@13.127.85.195:~/
+                 requirements.txt ec2-user@65.2.82.172:~/
 
 Step 10 ─► Installed Dependencies on EC2
            • SSH'd into EC2
@@ -444,11 +444,11 @@ Step 10 ─► Installed Dependencies on EC2
 Step 11 ─► Started Flask API on EC2
            • nohup python3 app.py > flask.log 2>&1 &
            • (nohup keeps it running even after closing SSH)
-           • Verified: curl http://13.127.85.195:5000/health ✅
+           • Verified: curl http://65.2.82.172:5000/health ✅
 
 Step 12 ─► Updated Frontend API URL
            • Changed script.js:
-             const API_BASE_URL = 'http://13.127.85.195:5000';
+             const API_BASE_URL = 'http://65.2.82.172:5000';
 
 Step 13 ─► Upload Frontend to S3 (Member 1)
            • Upload index.html, style.css, script.js to 
@@ -595,7 +595,7 @@ Purpose:  Sends email to team when any alarm fires
 Frontend (script.js)                    Backend (app.py on EC2)
 ─────────────────────                   ──────────────────────
 
-fetch('http://13.127.85.195:5000       Flask receives the request
+fetch('http://65.2.82.172:5000       Flask receives the request
       /api/products')                   ─────────────────────────
         │                                       │
         │  HTTP GET Request                     │  
@@ -707,7 +707,7 @@ other (Same-Origin Policy)"            Browser: "OK, the server says
 │  ─────────────────────────────────────                           │
 │  1. Edit files on your Mac                                       │
 │  2. SCP files to EC2:                                            │
-│     scp -i key.pem <files> ec2-user@13.127.85.195:~/             │
+│     scp -i key.pem <files> ec2-user@65.2.82.172:~/             │
 │  3. SSH into EC2 and restart Flask:                              │
 │     pkill -f "python3 app.py"                                    │
 │     nohup python3 app.py > flask.log 2>&1 &                      │
@@ -744,15 +744,15 @@ scp -i /Users/bot/Downloads/shopvista-key.pem \
   /Users/bot/Desktop/AWS_assignment/member2-backend/app.py \
   /Users/bot/Desktop/AWS_assignment/member2-backend/products.json \
   /Users/bot/Desktop/AWS_assignment/member2-backend/requirements.txt \
-  ec2-user@13.127.85.195:~/
+  ec2-user@65.2.82.172:~/
 
 # Upload a SINGLE file to EC2 (e.g., after editing products.json)
 scp -i /Users/bot/Downloads/shopvista-key.pem \
   /Users/bot/Desktop/AWS_assignment/member2-backend/products.json \
-  ec2-user@13.127.85.195:~/
+  ec2-user@65.2.82.172:~/
 
 # SSH into EC2
-ssh -i /Users/bot/Downloads/shopvista-key.pem ec2-user@13.127.85.195
+ssh -i /Users/bot/Downloads/shopvista-key.pem ec2-user@65.2.82.172
 
 
 # ── EC2 COMMANDS (after SSH) ────────────────────────────
@@ -1075,7 +1075,7 @@ What we accomplished:
 
 ✅ Built a responsive, dark-mode product catalog frontend
 ✅ Built a Flask REST API with product endpoints
-✅ Deployed the API on EC2 (IP: 13.127.85.195)
+✅ Deployed the API on EC2 (IP: 65.2.82.172)
 ✅ Stored product images on S3 (products-images-123)
 ✅ Connected frontend → EC2 API → S3 images
 ✅ Added CloudWatch monitoring with live dashboard
